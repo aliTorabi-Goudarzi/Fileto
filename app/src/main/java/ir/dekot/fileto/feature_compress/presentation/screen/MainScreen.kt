@@ -13,8 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ir.dekot.fileto.feature_compress.domain.model.CompressionProfile
+import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
 import ir.dekot.fileto.feature_compress.presentation.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun MainScreen(
@@ -76,7 +78,12 @@ fun MainScreen(
 
             if (uiState.showSettingsDialog) {
                 CompressionSettingsDialog(
-                    onDismiss = { viewModel.onShowSettingsDialog(false) }
+                    currentSettings = uiState.customSettings,
+                    onDismiss = { viewModel.onShowSettingsDialog(false) },
+                    onConfirm = { newSettings ->
+                        viewModel.onCustomSettingsChanged(newSettings)
+                        viewModel.onShowSettingsDialog(false)
+                    }
                 )
             }
         }
@@ -166,36 +173,36 @@ fun CompressionOptions(
                 onDismissRequest = { expanded = false }
             ) {
                 CompressionProfile.entries.forEach { profile ->
-                    if (profile != CompressionProfile.CUSTOM) { // فعلا گزینه سفارشی را نمایش نمی‌دهیم
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(profile.displayName)
-                                    if (profile.estimatedReduction.isNotBlank()) {
-                                        Badge {
-                                            Text(profile.estimatedReduction)
-                                        }
+                    DropdownMenuItem(
+                        text = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(profile.displayName)
+                                if (profile.estimatedReduction.isNotBlank()) {
+                                    Badge {
+                                        Text(profile.estimatedReduction)
                                     }
                                 }
-                            },
-                            onClick = {
-                                onProfileChange(profile)
-                                expanded = false
                             }
-                        )
-                    }
+                        },
+                        onClick = {
+                            onProfileChange(profile)
+                            expanded = false
+                        }
+                    )
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // دکمه تنظیمات فقط زمانی فعال است که پروفایل "سفارشی" انتخاب شده باشد
         OutlinedButton(
             onClick = onSettingsClick,
+            enabled = selectedProfile == CompressionProfile.CUSTOM,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("تنظیمات پیشرفته فشرده‌سازی")
@@ -203,17 +210,81 @@ fun CompressionOptions(
     }
 }
 
+
 @Composable
-fun CompressionSettingsDialog(onDismiss: () -> Unit) {
+fun CompressionSettingsDialog(
+    currentSettings: CompressionSettings,
+    onDismiss: () -> Unit,
+    onConfirm: (CompressionSettings) -> Unit
+) {
+    var imageQuality by remember { mutableFloatStateOf(currentSettings.imageQuality.toFloat()) }
+    var removeMetadata by remember { mutableStateOf(currentSettings.removeMetadata) }
+    var useObjectStreams by remember { mutableStateOf(currentSettings.useObjectStreamCompression) }
+    var downscaleDpi by remember { mutableFloatStateOf(currentSettings.downscaleResolution.toFloat()) }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("تنظیمات پیشرفته") },
+        title = { Text("تنظیمات سفارشی") },
         text = {
-            Text("این بخش در آینده پیاده‌سازی خواهد شد.")
+            Column {
+                // تنظیم کیفیت تصویر
+                Text("کیفیت تصویر: ${imageQuality.roundToInt()}%")
+                Slider(
+                    value = imageQuality,
+                    onValueChange = { imageQuality = it },
+                    valueRange = 0f..100f,
+                    steps = 99
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // تنظیم رزولوشن تصویر
+                Text("حداکثر رزولوشن تصویر: ${downscaleDpi.roundToInt()} DPI")
+                Slider(
+                    value = downscaleDpi,
+                    onValueChange = { downscaleDpi = it },
+                    valueRange = 72f..300f,
+                    steps = (300-72) - 1
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // تنظیم حذف متادیتا
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("حذف متادیتا", modifier = Modifier.weight(1f))
+                    Switch(checked = removeMetadata, onCheckedChange = { removeMetadata = it })
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // تنظیم فشرده‌سازی ساختاری
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("فشرده‌سازی ساختاری", modifier = Modifier.weight(1f))
+                    Switch(checked = useObjectStreams, onCheckedChange = { useObjectStreams = it })
+                }
+            }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = {
+                    val newSettings = currentSettings.copy(
+                        imageQuality = imageQuality.roundToInt(),
+                        removeMetadata = removeMetadata,
+                        useObjectStreamCompression = useObjectStreams,
+                        downscaleResolution = downscaleDpi.roundToInt()
+                    )
+                    onConfirm(newSettings)
+                }
+            ) {
                 Text("تایید")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("لغو")
             }
         }
     )

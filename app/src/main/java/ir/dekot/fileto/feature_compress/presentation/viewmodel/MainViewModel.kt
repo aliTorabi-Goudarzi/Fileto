@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.dekot.fileto.feature_compress.domain.model.CompressionProfile
+import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
 import ir.dekot.fileto.feature_compress.domain.usecase.CompressPdfUseCase
 import ir.dekot.fileto.feature_compress.domain.usecase.GetFileNameUseCase
 import ir.dekot.fileto.feature_compress.presentation.state.MainScreenState
@@ -25,7 +26,7 @@ class MainViewModel @Inject constructor(
 
     fun onFileSelected(uri: Uri?) {
         if (uri == null) return
-        val fileName = getFileNameUseCase((uri)) ?: "Unknown File"
+        val fileName = getFileNameUseCase(uri) ?: "Unknown File"
         _uiState.update {
             it.copy(
                 selectedFileUri = uri,
@@ -35,7 +36,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun onResetFileSelection() {
-        _uiState.update { MainScreenState() } // ریست کامل State
+        _uiState.update { MainScreenState() }
     }
 
     fun onCompressionProfileChanged(profile: CompressionProfile) {
@@ -52,15 +53,18 @@ class MainViewModel @Inject constructor(
             val result = compressPdfUseCase(
                 sourceUri = sourceUri,
                 fileName = fileName,
-                profile = _uiState.value.compressionProfile
+                profile = _uiState.value.compressionProfile,
+                customSettings = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
+                    _uiState.value.customSettings
+                } else {
+                    null
+                }
             )
 
-            result.onSuccess { compressedFileUri ->
-                // پس از موفقیت، State را ریست می‌کنیم و پیام موفقیت را تنظیم می‌کنیم
+            result.onSuccess {
                 _uiState.update {
                     MainScreenState(snackbarMessage = "فایل با موفقیت فشرده و ذخیره شد!")
                 }
-                // TODO: اطلاعات فایل فشرده شده را در دیتابیس تاریخچه ذخیره کن
             }.onFailure { exception ->
                 _uiState.update {
                     it.copy(
@@ -74,6 +78,10 @@ class MainViewModel @Inject constructor(
 
     fun onShowSettingsDialog(show: Boolean) {
         _uiState.update { it.copy(showSettingsDialog = show) }
+    }
+
+    fun onCustomSettingsChanged(settings: CompressionSettings) {
+        _uiState.update { it.copy(customSettings = settings) }
     }
 
     fun onSnackbarShown() {

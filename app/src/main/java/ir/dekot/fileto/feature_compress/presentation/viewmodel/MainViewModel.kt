@@ -1,10 +1,12 @@
 package ir.dekot.fileto.feature_compress.presentation.viewmodel
 
+import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import ir.dekot.fileto.feature_compress.domain.model.CompressionProfile
 import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
 import ir.dekot.fileto.feature_compress.domain.usecase.CompressPdfUseCase
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import ir.dekot.fileto.R
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -25,6 +28,7 @@ class MainViewModel @Inject constructor(
     private val getFileNameUseCase: GetFileNameUseCase,
     private val addHistoryUseCase: AddHistoryUseCase,
     private val getFileSizeUseCase: GetFileSizeUseCase, // تزریق شد
+    @param:ApplicationContext private val context: Context // تزریق Context برای دسترسی به منابع
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainScreenState())
@@ -63,39 +67,35 @@ class MainViewModel @Inject constructor(
                 profile = _uiState.value.compressionProfile,
                 customSettings = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
                     _uiState.value.customSettings
-                } else {
-                    null
-                }
+                } else null
             )
 
             result.onSuccess { compressedFileUri ->
-                // ذخیره در تاریخچه
-                result.onSuccess { compressedFileUri ->
-                    val compressedSize = getFileSizeUseCase(compressedFileUri) ?: 0L
-                    val historyItem = HistoryItem(
-                        id = 0,
-                        fileName = fileName,
-                        timestamp = System.currentTimeMillis(),
-                        compressionProfile = _uiState.value.compressionProfile.displayName,
-                        customSettingsJson = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
-                            Gson().toJson(_uiState.value.customSettings)
-                        } else null,
-                        originalSize = originalSize,
-                        compressedSize = compressedSize,
-                        compressedFileUri = compressedFileUri.toString(),
-                        isStarred = false
-                    )
-                    addHistoryUseCase(historyItem)
+                val compressedSize = getFileSizeUseCase(compressedFileUri) ?: 0L
+                val historyItem = HistoryItem(
+                    id = 0,
+                    fileName = fileName,
+                    timestamp = System.currentTimeMillis(),
+                    // --- اصلاح کلیدی: ذخیره نام enum به جای نام نمایشی ---
+                    compressionProfile = _uiState.value.compressionProfile.name,
+                    customSettingsJson = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
+                        Gson().toJson(_uiState.value.customSettings)
+                    } else null,
+                    originalSize = originalSize,
+                    compressedSize = compressedSize,
+                    compressedFileUri = compressedFileUri.toString(),
+                    isStarred = false
+                )
+                addHistoryUseCase(historyItem)
 
-                    _uiState.update {
-                        MainScreenState(snackbarMessage = "فایل با موفقیت فشرده و ذخیره شد!")
-                    }
+                _uiState.update {
+                    MainScreenState(snackbarMessage = context.getString(R.string.compression_successful))
                 }
             }.onFailure { exception ->
                 _uiState.update {
                     it.copy(
                         isCompressing = false,
-                        snackbarMessage = "خطا: ${exception.message}"
+                        snackbarMessage = "${context.getString(R.string.error_prefix)}: ${exception.message}"
                     )
                 }
             }

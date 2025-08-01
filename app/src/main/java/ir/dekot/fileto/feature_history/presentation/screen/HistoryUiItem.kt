@@ -4,7 +4,7 @@ data class HistoryUiItem(
     val id: Int,
     val fileName: String,
     val formattedDate: String,
-    val compressionProfile: String,
+    val compressionProfileName: String, // نام enum (مثلا "DEFAULT") ذخیره می‌شود
     val customSettings: List<Pair<String, String>>?, // جایگزین رشته JSON
     val formattedSize: String,
     val reductionPercentage: Int,

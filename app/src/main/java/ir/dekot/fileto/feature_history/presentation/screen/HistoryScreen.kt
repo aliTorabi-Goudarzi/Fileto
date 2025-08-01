@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import ir.dekot.fileto.feature_history.presentation.viewmodel.HistoryViewModel
 import ir.dekot.fileto.R
+import ir.dekot.fileto.feature_compress.domain.model.CompressionProfile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,18 +116,27 @@ fun HistoryItemCard(
     item: HistoryUiItem,
     onEvent: (HistoryViewModel.UserEvent) -> Unit
 ) {
+    // --- منطق ترجمه به داخل Composable منتقل شد ---
+    val profileEnum = remember(item.compressionProfileName) {
+        try {
+            CompressionProfile.valueOf(item.compressionProfileName)
+        } catch (_: IllegalArgumentException) {
+            null
+        }
+    }
+    val profileDisplayName = profileEnum?.let { stringResource(id = it.displayNameRes) } ?: item.compressionProfileName
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(item.fileName, style = MaterialTheme.typography.titleMedium)
             Text(item.formattedDate, style = MaterialTheme.typography.bodySmall)
             Spacer(modifier = Modifier.height(8.dp))
-            Text("${stringResource(id = R.string.type_prefix)}: ${item.compressionProfile}", style = MaterialTheme.typography.bodyMedium)
+            Text("${stringResource(id = R.string.type_prefix)}: $profileDisplayName", style = MaterialTheme.typography.bodyMedium)
             // --- نمایش تنظیمات سفارشی ---
             item.customSettings?.let { settings ->
                 Column(modifier = Modifier.padding(start = 16.dp, top = 4.dp)) {
                     settings.forEach { (key, value) ->
                         Text(
-                            text = "• $key: $value",
+                            text = "• $key: $value", // کلیدها از قبل ترجمه شده‌اند
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

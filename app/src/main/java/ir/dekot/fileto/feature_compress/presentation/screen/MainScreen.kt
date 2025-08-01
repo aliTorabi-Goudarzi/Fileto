@@ -5,21 +5,29 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import ir.dekot.fileto.core.navigation.Screen
 import ir.dekot.fileto.feature_compress.domain.model.CompressionProfile
 import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
 import ir.dekot.fileto.feature_compress.presentation.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import ir.dekot.fileto.R
 
 @Composable
 fun MainScreen(
+    navController: NavController, // NavController اضافه شد
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -43,7 +51,13 @@ fun MainScreen(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                floatingActionButton = {
+            ExpandingFab(
+                onHistoryClick = { navController.navigate(Screen.HistoryScreen.route) },
+                onSettingsClick = { navController.navigate(Screen.SettingsScreen.route) }
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -105,7 +119,7 @@ fun FileSelectionHeader(fileName: String, onReset: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = fileName.ifEmpty { "فایلی انتخاب نشده است" },
+                text = fileName.ifEmpty { stringResource(id = R.string.file_not_selected) },
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
@@ -137,7 +151,7 @@ fun MainActionButton(
                 .fillMaxWidth()
                 .height(50.dp)
         ) {
-            Text(text = if (isFileSelected) "شروع فشرده‌سازی" else "انتخاب فایل PDF")
+            Text(text = if (isFileSelected) stringResource(id = R.string.start_compression) else stringResource(id = R.string.select_pdf_file))
         }
     }
 }
@@ -160,7 +174,7 @@ fun CompressionOptions(
                 value = selectedProfile.displayName,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("نوع فشرده‌سازی") },
+                label = { Text(stringResource(id = R.string.compression_type)) },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 },
@@ -205,7 +219,7 @@ fun CompressionOptions(
             enabled = selectedProfile == CompressionProfile.CUSTOM,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("تنظیمات پیشرفته فشرده‌سازی")
+            Text(stringResource(id = R.string.advanced_compression_settings))
         }
     }
 }
@@ -224,11 +238,11 @@ fun CompressionSettingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("تنظیمات سفارشی") },
+        title = { Text(stringResource(id = R.string.custom_settings)) },
         text = {
             Column {
                 // تنظیم کیفیت تصویر
-                Text("کیفیت تصویر: ${imageQuality.roundToInt()}%")
+                Text(stringResource(id = R.string.image_quality, imageQuality.roundToInt()))
                 Slider(
                     value = imageQuality,
                     onValueChange = { imageQuality = it },
@@ -238,7 +252,7 @@ fun CompressionSettingsDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // تنظیم رزولوشن تصویر
-                Text("حداکثر رزولوشن تصویر: ${downscaleDpi.roundToInt()} DPI")
+                Text(stringResource(id = R.string.max_image_resolution, downscaleDpi.roundToInt()))
                 Slider(
                     value = downscaleDpi,
                     onValueChange = { downscaleDpi = it },
@@ -252,7 +266,7 @@ fun CompressionSettingsDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("حذف متادیتا", modifier = Modifier.weight(1f))
+                    Text(stringResource(id = R.string.remove_metadata), modifier = Modifier.weight(1f))
                     Switch(checked = removeMetadata, onCheckedChange = { removeMetadata = it })
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -262,7 +276,7 @@ fun CompressionSettingsDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("فشرده‌سازی ساختاری", modifier = Modifier.weight(1f))
+                    Text(stringResource(id = R.string.structural_compression), modifier = Modifier.weight(1f))
                     Switch(checked = useObjectStreams, onCheckedChange = { useObjectStreams = it })
                 }
             }
@@ -279,13 +293,41 @@ fun CompressionSettingsDialog(
                     onConfirm(newSettings)
                 }
             ) {
-                Text("تایید")
+                Text(stringResource(id = R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("لغو")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )
+}
+
+@Composable
+fun ExpandingFab(
+    onHistoryClick: () -> Unit,
+    onSettingsClick: () -> Unit
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Column(horizontalAlignment = Alignment.End) {
+        if (isExpanded) {
+            SmallFloatingActionButton(
+                onClick = onHistoryClick,
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Icon(Icons.Default.History, contentDescription = "History")
+            }
+            SmallFloatingActionButton(
+                onClick = onSettingsClick,
+                modifier = Modifier.padding(bottom = 16.dp)
+            ) {
+                Icon(Icons.Default.Settings, contentDescription = "Settings")
+            }
+        }
+        FloatingActionButton(onClick = { isExpanded = !isExpanded }) {
+            Icon(Icons.Default.Menu, contentDescription = "Menu")
+        }
+    }
 }

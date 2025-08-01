@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">فایلتو</string>
+    <string name="file_not_selected">فایلی انتخاب نشده است</string>
+    <string name="select_pdf_file">انتخاب فایل PDF</string>
+    <string name="start_compression">شروع فشرده‌سازی</string>
+    <string name="reselect_file">انتخاب مجدد فایل</string>
+    <string name="compression_type">نوع فشرده‌سازی</string>
+    <string name="advanced_compression_settings">تنظیمات پیشرفته فشرده‌سازی</string>
+    <string name="custom_settings">تنظیمات سفارشی</string>
+    <string name="image_quality">کیفیت تصویر: %d%%</string>
+    <string name="remove_metadata">حذف متادیتا</string>
+    <string name="structural_compression">فشرده‌سازی ساختاری</string>
+    <string name="max_image_resolution">حداکثر رزولوشن تصویر: %d DPI</string>
+    <string name="confirm">تایید</string>
+    <string name="cancel">لغو</string>
+    <string name="compression_successful">فایل با موفقیت فشرده و ذخیره شد!</string>
+    <string name="error_prefix">خطا</string>
+    <string name="history">تاریخچه</string>
+    <string name="settings">تنظیمات</string>
+    <string name="back">بازگشت</string>
+    <string name="compression_history">تاریخچه فشرده‌سازی</string>
+    <string name="no_history_to_display">تاریخچه‌ای برای نمایش وجود ندارد.</string>
+    <string name="type_prefix">نوع</string>
+    <string name="size_prefix">حجم</string>
+    <string name="reduction_suffix">% کاهش</string>
+    <string name="open_file">باز کردن فایل</string>
+    <string name="pdf_viewer_not_found">هیچ برنامه‌ای برای باز کردن PDF یافت نشد.</string>
+    <string name="select_theme">انتخاب تم</string>
+    <string name="light_theme">روشن</string>
+    <string name="dark_theme">تاریک</string>
+    <string name="system_default_theme">پیش‌فرض سیستم</string>
+    <string name="select_language">انتخاب زبان</string>
+    <string name="language_persian">فارسی</string>
+    <string name="language_english">English</string>
+</resources>

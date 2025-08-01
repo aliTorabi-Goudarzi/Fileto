@@ -18,16 +18,16 @@ class PdfRepositoryImpl @Inject constructor(
     private val localDataSource: PdfLocalDataSource,
     @param:ApplicationContext private val context: Context
 ) : PdfRepository {
+
     override suspend fun compressPdf(
         sourceUri: Uri,
         fileName: String,
         profile: CompressionProfile,
         customSettings: CompressionSettings?
-    ): Result<Uri> = withContext(Dispatchers.IO) { // خروجی به Result<Uri> تغییر کرد
+    ): Result<Uri> = withContext(Dispatchers.IO) {
         try {
             val profileDto = profile.toDto()
             val settingsDto = customSettings?.toDto()
-            // حالا DataSource مسئول ساخت فایل و برگرداندن Uri آن است
             val destinationUri = localDataSource.compressPdfFile(sourceUri, fileName, profileDto, settingsDto)
             Result.success(destinationUri)
         } catch (e: Exception) {
@@ -36,12 +36,34 @@ class PdfRepositoryImpl @Inject constructor(
         }
     }
 
-    // پیاده‌سازی متد جدید در لایه Data
     override fun getFileNameFromUri(uri: Uri): String? {
         return context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
             cursor.moveToFirst()
             cursor.getString(nameIndex)
         }
+    }
+
+    // --- متد اصلاح شده و کامل برای خواندن حجم فایل ---
+    override fun getFileSizeFromUri(uri: Uri): Long? {
+        try {
+            // روش اصلی و استاندارد
+            context.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    if (sizeIndex != -1 && !cursor.isNull(sizeIndex)) {
+                        return cursor.getLong(sizeIndex)
+                    }
+                }
+            }
+            // روش جایگزین برای URI هایی که از روش بالا پشتیبانی نمی‌کنند
+            context.contentResolver.openFileDescriptor(uri, "r")?.use {
+                return it.statSize
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
+        }
+        return null
     }
 }

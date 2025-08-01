@@ -69,6 +69,8 @@ dependencies {
 //    implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.serialization.json)
+    // --- JSON Serialization ---
+    implementation(libs.gson) // این خط را اضافه کنید
     // از آنجایی که پروژه متن‌باز است، از نسخه Community با لایسنس AGPL استفاده می‌کنیم.
     // --- iText (برای کار با PDF) ---
     implementation(libs.itext.core) {

@@ -10,8 +10,8 @@ interface PdfRepository {
         fileName: String,
         profile: CompressionProfile,
         customSettings: CompressionSettings? = null
-    ): Result<Uri> // خروجی به Uri فایل فشرده شده تغییر کرد
+    ): Result<Uri>
 
-    // متد جدید برای گرفتن نام فایل از URI
     fun getFileNameFromUri(uri: Uri): String?
+    fun getFileSizeFromUri(uri: Uri): Long?
 }

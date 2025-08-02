@@ -4,16 +4,16 @@ import android.content.Intent
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-// دیگر نیازی به Gson در این کلاس نداریم
-// import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.dekot.fileto.feature_history.domain.usecase.DeleteHistoryItemUseCase
-import ir.dekot.fileto.feature_history.domain.usecase.FormatFileSizeUseCase
+// UseCase فرمت‌بندی حذف شد
+// import ir.dekot.fileto.feature_history.domain.usecase.FormatFileSizeUseCase
 import ir.dekot.fileto.feature_history.domain.usecase.GetHistoryUseCase
 import ir.dekot.fileto.feature_history.domain.usecase.ToggleStarStatusUseCase
 import ir.dekot.fileto.feature_history.presentation.event.HistoryEvent
 import ir.dekot.fileto.feature_history.presentation.event.UserEvent
-import ir.dekot.fileto.feature_history.presentation.screen.HistoryUiItem
+// Mapper جدید ایمپورت شد
+import ir.dekot.fileto.feature_history.presentation.mapper.HistoryUiMapper
 import ir.dekot.fileto.feature_history.presentation.state.HistoryScreenState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,15 +23,17 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+// ایمپورت‌های مربوط به فرمت‌بندی حذف شدند
+// import java.text.SimpleDateFormat
+// import java.util.Date
+// import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     getHistoryUseCase: GetHistoryUseCase,
-    private val formatFileSizeUseCase: FormatFileSizeUseCase,
+    // وابستگی به UseCase حذف و به Mapper جدید جایگزین شد
+    private val historyUiMapper: HistoryUiMapper,
     private val toggleStarStatusUseCase: ToggleStarStatusUseCase,
     private val deleteHistoryItemUseCase: DeleteHistoryItemUseCase
 ) : ViewModel() {
@@ -47,35 +49,9 @@ class HistoryViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     isLoading = false,
-                    historyItems = historyItems.map { domainItem ->
-                        val reduction = if (domainItem.originalSize > 0) {
-                            100 - (domainItem.compressedSize * 100 / domainItem.originalSize)
-                        } else 0
-
-                        // --- << تغییر اصلی اینجاست >> ---
-                        // دیگر نیازی به پارس کردن JSON نیست. مستقیماً از آبجکت استفاده می‌کنیم.
-                        val customSettingsList: List<Pair<String, String>>? = domainItem.customSettings?.let { settings ->
-                            buildList {
-                                add("کیفیت تصویر" to "${settings.imageQuality}%")
-                                add("حذف متادیتا" to if (settings.removeMetadata) "بله" else "خیر")
-                                add("فشرده‌سازی ساختاری" to if (settings.useObjectStreamCompression) "بله" else "خیر")
-                                add("حداکثر رزولوشن" to "${settings.downscaleResolution} DPI")
-                            }
-                        }
-
-                        HistoryUiItem(
-                            id = domainItem.id,
-                            fileName = domainItem.fileName,
-                            formattedDate = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(domainItem.timestamp)),
-                            compressionProfile = domainItem.compressionProfile,
-                            // آبجکت جدید را به UI Item پاس می‌دهیم
-                            customSettings = customSettingsList,
-                            formattedSize = "${formatFileSizeUseCase(domainItem.originalSize)} -> ${formatFileSizeUseCase(domainItem.compressedSize)}",
-                            reductionPercentage = reduction.toInt(),
-                            compressedFileUri = domainItem.compressedFileUri,
-                            isStarred = domainItem.isStarred
-                        )
-                    }
+                    // <<-- تغییر اصلی اینجاست -->>
+                    // تمام منطق تبدیل به Mapper واگذار شد
+                    historyItems = historyItems.map(historyUiMapper::toUiItem)
                 )
             }
         }.launchIn(viewModelScope)

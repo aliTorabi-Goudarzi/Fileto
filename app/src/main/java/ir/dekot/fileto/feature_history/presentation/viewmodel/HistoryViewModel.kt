@@ -1,14 +1,11 @@
 package ir.dekot.fileto.feature_history.presentation.viewmodel
 
-import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import ir.dekot.fileto.feature_compress.domain.model.CompressionProfile
 import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
 
 import ir.dekot.fileto.feature_history.domain.usecase.DeleteHistoryItemUseCase
@@ -29,15 +26,13 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
-import ir.dekot.fileto.R
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     getHistoryUseCase: GetHistoryUseCase,
     private val formatFileSizeUseCase: FormatFileSizeUseCase,
     private val toggleStarStatusUseCase: ToggleStarStatusUseCase,
-    private val deleteHistoryItemUseCase: DeleteHistoryItemUseCase,
-    @param:ApplicationContext private val context: Context // تزریق Context برای دسترسی به منابع رشته
+    private val deleteHistoryItemUseCase: DeleteHistoryItemUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryScreenState())
@@ -57,29 +52,25 @@ class HistoryViewModel @Inject constructor(
                         } else 0
 
                         // --- منطق پارس کردن JSON ---
-                        // --- منطق ترجمه شده برای پروفایل و تنظیمات سفارشی ---
-                        val profileEnum = CompressionProfile.entries.find { p -> p.name == domainItem.compressionProfile }
-                        val profileDisplayName = profileEnum?.let { p -> context.getString(p.displayNameRes) } ?: domainItem.compressionProfile
-
                         val customSettingsList: List<Pair<String, String>>? = domainItem.customSettingsJson?.let { json ->
                             try {
                                 val settings = Gson().fromJson(json, CompressionSettings::class.java)
-                                val yes = context.getString(R.string.custom_setting_value_yes)
-                                val no = context.getString(R.string.custom_setting_value_no)
                                 buildList {
-                                    add(context.getString(R.string.custom_setting_image_quality) to "${settings.imageQuality}%")
-                                    add(context.getString(R.string.custom_setting_remove_metadata) to if (settings.removeMetadata) yes else no)
-                                    add(context.getString(R.string.custom_setting_structural_compression) to if (settings.useObjectStreamCompression) yes else no)
-                                    add(context.getString(R.string.custom_setting_max_resolution) to "${settings.downscaleResolution} DPI")
+                                    add("کیفیت تصویر" to "${settings.imageQuality}%")
+                                    add("حذف متادیتا" to if (settings.removeMetadata) "بله" else "خیر")
+                                    add("فشرده‌سازی ساختاری" to if (settings.useObjectStreamCompression) "بله" else "خیر")
+                                    add("حداکثر رزولوشن" to "${settings.downscaleResolution} DPI")
                                 }
-                            } catch (_: Exception) { null }
+                            } catch (_: Exception) {
+                                null
+                            }
                         }
 
                         HistoryUiItem(
                             id = domainItem.id,
                             fileName = domainItem.fileName,
                             formattedDate = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(domainItem.timestamp)),
-                            compressionProfileName = domainItem.compressionProfile, // پاس دادن نام enum
+                            compressionProfile = domainItem.compressionProfile,
                             customSettings = customSettingsList,
                             formattedSize = "${formatFileSizeUseCase(domainItem.originalSize)} -> ${formatFileSizeUseCase(domainItem.compressedSize)}",
                             reductionPercentage = reduction.toInt(),

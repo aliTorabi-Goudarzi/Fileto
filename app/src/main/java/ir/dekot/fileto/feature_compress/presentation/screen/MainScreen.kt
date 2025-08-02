@@ -171,7 +171,7 @@ fun CompressionOptions(
             onExpandedChange = { expanded = !expanded }
         ) {
             OutlinedTextField(
-                value = stringResource(id = selectedProfile.displayNameRes), // استفاده از stringResource
+                value = selectedProfile.displayName,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text(stringResource(id = R.string.compression_type)) },
@@ -194,9 +194,11 @@ fun CompressionOptions(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(stringResource(id = profile.displayNameRes))
-                                Badge {
-                                    Text(stringResource(id = profile.estimatedReductionRes))
+                                Text(profile.displayName)
+                                if (profile.estimatedReduction.isNotBlank()) {
+                                    Badge {
+                                        Text(profile.estimatedReduction)
+                                    }
                                 }
                             }
                         },

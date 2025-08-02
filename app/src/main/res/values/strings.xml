@@ -32,23 +32,4 @@
     <string name="select_language">Select Language</string>
     <string name="language_persian">فارسی</string>
     <string name="language_english">English</string>
-    <!-- Compression Profiles -->
-    <string name="profile_default">Default</string>
-    <string name="profile_ebook">E-Book</string>
-    <string name="profile_high_quality">High Quality</string>
-    <string name="profile_custom">Custom</string>
-
-    <!-- Estimated Reduction -->
-    <string name="estimated_reduction_default">~ 10%</string>
-    <string name="estimated_reduction_ebook">~ 40%</string>
-    <string name="estimated_reduction_high_quality">~ 25%</string>
-    <string name="profile_custom_reduction">Variable</string>
-
-    <!-- Custom Settings Keys -->
-    <string name="custom_setting_image_quality">Image Quality</string>
-    <string name="custom_setting_remove_metadata">Remove Metadata</string>
-    <string name="custom_setting_structural_compression">Structural Compression</string>
-    <string name="custom_setting_max_resolution">Max Resolution</string>
-    <string name="custom_setting_value_yes">Yes</string>
-    <string name="custom_setting_value_no">No</string>
 </resources>

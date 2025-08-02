@@ -33,23 +33,4 @@
     <string name="select_language">انتخاب زبان</string>
     <string name="language_persian">فارسی</string>
     <string name="language_english">English</string>
-    <!-- Compression Profiles -->
-    <string name="profile_default">پیش‌فرض</string>
-    <string name="profile_ebook">کتاب الکترونیکی</string>
-    <string name="profile_high_quality">کیفیت بالا</string>
-    <string name="profile_custom">سفارشی</string>
-
-    <!-- Estimated Reduction -->
-    <string name="estimated_reduction_default">~ 10٪</string>
-    <string name="estimated_reduction_ebook">~ 40٪</string>
-    <string name="estimated_reduction_high_quality">~ 25٪</string>
-    <string name="profile_custom_reduction">متغیر</string>
-
-    <!-- Custom Settings Keys -->
-    <string name="custom_setting_image_quality">کیفیت تصویر</string>
-    <string name="custom_setting_remove_metadata">حذف متادیتا</string>
-    <string name="custom_setting_structural_compression">فشرده‌سازی ساختاری</string>
-    <string name="custom_setting_max_resolution">حداکثر رزولوشن</string>
-    <string name="custom_setting_value_yes">بله</string>
-    <string name="custom_setting_value_no">خیر</string>
 </resources>

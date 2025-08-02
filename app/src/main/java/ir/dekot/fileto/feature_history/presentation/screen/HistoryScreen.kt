@@ -43,6 +43,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import ir.dekot.fileto.feature_history.presentation.viewmodel.HistoryViewModel
 import ir.dekot.fileto.R
+import ir.dekot.fileto.feature_history.presentation.event.HistoryEvent
+import ir.dekot.fileto.feature_history.presentation.event.UserEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +59,7 @@ fun HistoryScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is HistoryViewModel.HistoryEvent.Navigate -> {
+                is HistoryEvent.Navigate -> {
                     try {
                         context.startActivity(event.intent)
                     } catch (_: ActivityNotFoundException) {
@@ -112,7 +114,7 @@ fun HistoryScreen(
 @Composable
 fun HistoryItemCard(
     item: HistoryUiItem,
-    onEvent: (HistoryViewModel.UserEvent) -> Unit
+    onEvent: (UserEvent) -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -143,18 +145,18 @@ fun HistoryItemCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = { onEvent(HistoryViewModel.UserEvent.OpenFile(item.compressedFileUri)) }) {
+                Button(onClick = { onEvent(UserEvent.OpenFile(item.compressedFileUri)) }) {
                     Text(stringResource(id = R.string.open_file))
                 }
                 Row {
-                    IconButton(onClick = { onEvent(HistoryViewModel.UserEvent.ToggleStar(item.id, item.isStarred)) }) {
+                    IconButton(onClick = { onEvent(UserEvent.ToggleStar(item.id, item.isStarred)) }) {
                         Icon(
                             imageVector = if (item.isStarred) Icons.Filled.Star else Icons.Outlined.StarBorder,
                             contentDescription = "Star",
                             tint = if (item.isStarred) MaterialTheme.colorScheme.primary else LocalContentColor.current
                         )
                     }
-                    IconButton(onClick = { onEvent(HistoryViewModel.UserEvent.DeleteItem(item.id)) }) {
+                    IconButton(onClick = { onEvent(UserEvent.DeleteItem(item.id)) }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete",

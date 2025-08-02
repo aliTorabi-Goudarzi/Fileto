@@ -12,6 +12,8 @@ import ir.dekot.fileto.feature_history.domain.usecase.DeleteHistoryItemUseCase
 import ir.dekot.fileto.feature_history.domain.usecase.FormatFileSizeUseCase
 import ir.dekot.fileto.feature_history.domain.usecase.GetHistoryUseCase
 import ir.dekot.fileto.feature_history.domain.usecase.ToggleStarStatusUseCase
+import ir.dekot.fileto.feature_history.presentation.event.HistoryEvent
+import ir.dekot.fileto.feature_history.presentation.event.UserEvent
 import ir.dekot.fileto.feature_history.presentation.screen.HistoryUiItem
 import ir.dekot.fileto.feature_history.presentation.state.HistoryScreenState
 import kotlinx.coroutines.channels.Channel
@@ -101,15 +103,5 @@ class HistoryViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    sealed class UserEvent {
-        data class OpenFile(val uriString: String) : UserEvent()
-        data class ToggleStar(val id: Int, val isStarred: Boolean) : UserEvent()
-        data class DeleteItem(val id: Int) : UserEvent()
-    }
-
-    sealed class HistoryEvent {
-        data class Navigate(val intent: Intent) : HistoryEvent()
     }
 }

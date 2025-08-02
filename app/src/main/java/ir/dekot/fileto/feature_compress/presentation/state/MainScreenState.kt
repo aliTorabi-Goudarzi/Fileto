@@ -1,11 +1,10 @@
 package ir.dekot.fileto.feature_compress.presentation.state
 
-import android.net.Uri
 import ir.dekot.fileto.feature_compress.domain.model.CompressionProfile
 import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
 
 data class MainScreenState(
-    val selectedFileUri: Uri? = null,
+    val selectedFileUri: String? = null, // از Uri? به String? تغییر کرد
     val selectedFileName: String = "",
     val isCompressing: Boolean = false,
     val compressionProfile: CompressionProfile = CompressionProfile.DEFAULT,

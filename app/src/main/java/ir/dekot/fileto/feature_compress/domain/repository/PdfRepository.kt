@@ -1,17 +1,27 @@
 package ir.dekot.fileto.feature_compress.domain.repository
 
-import android.net.Uri
 import ir.dekot.fileto.feature_compress.domain.model.CompressionProfile
 import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
 
 interface PdfRepository {
+    /**
+     * @param sourceUriPath مسیر فایل منبع به صورت رشته (String)
+     * @return Result<String> مسیر فایل فشرده شده به صورت رشته (String)
+     */
     suspend fun compressPdf(
-        sourceUri: Uri,
+        sourceUriPath: String,
         fileName: String,
         profile: CompressionProfile,
         customSettings: CompressionSettings? = null
-    ): Result<Uri>
+    ): Result<String>
 
-    fun getFileNameFromUri(uri: Uri): String?
-    fun getFileSizeFromUri(uri: Uri): Long?
-}
+    /**
+     * @param uriPath مسیر فایل به صورت رشته (String)
+     */
+    fun getFileNameFromUri(uriPath: String): String?
+
+    /**
+     * @param uriPath مسیر فایل به صورت رشته (String)
+     */
+    fun getFileSizeFromUri(uriPath: String): Long?
+    }

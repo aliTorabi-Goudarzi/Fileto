@@ -24,7 +24,7 @@ class MainViewModel @Inject constructor(
     private val compressPdfUseCase: CompressPdfUseCase,
     private val getFileNameUseCase: GetFileNameUseCase,
     private val addHistoryUseCase: AddHistoryUseCase,
-    private val getFileSizeUseCase: GetFileSizeUseCase, // تزریق شد
+    private val getFileSizeUseCase: GetFileSizeUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainScreenState())
@@ -32,10 +32,11 @@ class MainViewModel @Inject constructor(
 
     fun onFileSelected(uri: Uri?) {
         if (uri == null) return
-        val fileName = getFileNameUseCase(uri) ?: "Unknown File"
+        val uriPath = uri.toString() // تبدیل Uri به String
+        val fileName = getFileNameUseCase(uriPath) ?: "Unknown File"
         _uiState.update {
             it.copy(
-                selectedFileUri = uri,
+                selectedFileUri = uriPath, // ذخیره به صورت String
                 selectedFileName = fileName
             )
         }
@@ -50,15 +51,15 @@ class MainViewModel @Inject constructor(
     }
 
     fun onStartCompression() {
-        val sourceUri = _uiState.value.selectedFileUri ?: return
+        val sourceUriPath = _uiState.value.selectedFileUri ?: return // حالا String است
         val fileName = _uiState.value.selectedFileName
-        val originalSize = getFileSizeUseCase(sourceUri) ?: 0L
+        val originalSize = getFileSizeUseCase(sourceUriPath) ?: 0L
 
         viewModelScope.launch {
             _uiState.update { it.copy(isCompressing = true, snackbarMessage = null) }
 
             val result = compressPdfUseCase(
-                sourceUri = sourceUri,
+                sourceUriPath = sourceUriPath, // ارسال String به UseCase
                 fileName = fileName,
                 profile = _uiState.value.compressionProfile,
                 customSettings = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
@@ -68,28 +69,26 @@ class MainViewModel @Inject constructor(
                 }
             )
 
-            result.onSuccess { compressedFileUri ->
+            result.onSuccess { compressedFileUriPath -> // حالا String است
                 // ذخیره در تاریخچه
-                result.onSuccess { compressedFileUri ->
-                    val compressedSize = getFileSizeUseCase(compressedFileUri) ?: 0L
-                    val historyItem = HistoryItem(
-                        id = 0,
-                        fileName = fileName,
-                        timestamp = System.currentTimeMillis(),
-                        compressionProfile = _uiState.value.compressionProfile.displayName,
-                        customSettingsJson = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
-                            Gson().toJson(_uiState.value.customSettings)
-                        } else null,
-                        originalSize = originalSize,
-                        compressedSize = compressedSize,
-                        compressedFileUri = compressedFileUri.toString(),
-                        isStarred = false
-                    )
-                    addHistoryUseCase(historyItem)
+                val compressedSize = getFileSizeUseCase(compressedFileUriPath) ?: 0L
+                val historyItem = HistoryItem(
+                    id = 0,
+                    fileName = fileName,
+                    timestamp = System.currentTimeMillis(),
+                    compressionProfile = _uiState.value.compressionProfile.displayName,
+                    customSettingsJson = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
+                        Gson().toJson(_uiState.value.customSettings)
+                    } else null,
+                    originalSize = originalSize,
+                    compressedSize = compressedSize,
+                    compressedFileUri = compressedFileUriPath, // ذخیره مستقیم String
+                    isStarred = false
+                )
+                addHistoryUseCase(historyItem)
 
-                    _uiState.update {
-                        MainScreenState(snackbarMessage = "فایل با موفقیت فشرده و ذخیره شد!")
-                    }
+                _uiState.update {
+                    MainScreenState(snackbarMessage = "فایل با موفقیت فشرده و ذخیره شد!")
                 }
             }.onFailure { exception ->
                 _uiState.update {

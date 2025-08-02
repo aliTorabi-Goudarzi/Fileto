@@ -2,32 +2,28 @@ package ir.dekot.fileto.feature_compress.data.local.datasource
 
 import android.content.ContentValues
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import com.itextpdf.io.image.ImageDataFactory
-import com.itextpdf.io.source.ByteArrayOutputStream
+import android.provider.OpenableColumns
 import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfName
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.kernel.pdf.ReaderProperties
 import com.itextpdf.kernel.pdf.WriterProperties
 import dagger.hilt.android.qualifiers.ApplicationContext
+import ir.dekot.fileto.feature_compress.data.local.datasource.helper.processImages
 import ir.dekot.fileto.feature_compress.data.local.entity.CompressionProfileDto
 import ir.dekot.fileto.feature_compress.data.local.entity.CompressionSettingsDto
 import javax.inject.Inject
-import com.itextpdf.kernel.pdf.xobject.PdfImageXObject
-import com.itextpdf.kernel.pdf.PdfName
-import androidx.core.graphics.scale
-import kotlin.math.roundToInt
+import androidx.core.net.toUri
 
 class PdfLocalDataSource @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) {
     fun compressPdfFile(
-        sourceUri: Uri,
+        sourceUri: Uri, // ورودی این متد همان Uri باقی می‌ماند
         originalFileName: String,
         profile: CompressionProfileDto,
         customSettings: CompressionSettingsDto?
@@ -71,14 +67,17 @@ class PdfLocalDataSource @Inject constructor(
                 imageQuality = 40
                 downscaleResolution = 150
             }
+
             CompressionProfileDto.HIGH_QUALITY -> {
                 imageQuality = 75
                 downscaleResolution = 300
             }
+
             CompressionProfileDto.CUSTOM -> {
                 imageQuality = customSettings?.imageQuality ?: 80
                 downscaleResolution = customSettings?.downscaleResolution ?: 150
             }
+
             else -> {
                 imageQuality = -1
                 downscaleResolution = -1
@@ -105,68 +104,46 @@ class PdfLocalDataSource @Inject constructor(
         return destinationUri
     }
 
-    private fun processImages(pdfDoc: PdfDocument, imageQuality: Int, downscaleResolution: Int) {
-        for (i in 1..pdfDoc.numberOfPages) {
-            val page = pdfDoc.getPage(i)
-            val resources = page.resources
-            val xobjects = resources.getResource(PdfName.XObject)
-            if (xobjects == null || !xobjects.isDictionary) {
-                continue
+    /**
+     * متد جدید: منطق خواندن نام فایل به اینجا منتقل شد
+     */
+    fun getFileNameFromUri(uriPath: String): String? {
+        return try {
+            val uri = uriPath.toUri()
+            context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                cursor.moveToFirst()
+                cursor.getString(nameIndex)
             }
-
-            val xobjectDict = xobjects
-            val keys = xobjectDict.keySet()
-            for (key in keys) {
-                val xobjectStream = xobjectDict.getAsStream(key)
-
-                if (xobjectStream != null && PdfName.Image.equals(xobjectStream.getAsName(PdfName.Subtype))) {
-                    try {
-                        val imageObject = PdfImageXObject(xobjectStream)
-                        val imageBytes = imageObject.imageBytes
-                        var bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-
-                        if (bitmap != null) {
-                            // کاهش رزولوشن تصویر
-                            bitmap = getScaledBitmap(bitmap, downscaleResolution)
-
-                            val baos = ByteArrayOutputStream()
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, imageQuality, baos)
-                            val newImageBytes = baos.toByteArray()
-
-                            val newImageData = ImageDataFactory.create(newImageBytes)
-                            val newImage = PdfImageXObject(newImageData)
-
-                            xobjectDict.put(key, newImage.pdfObject)
-                            bitmap.recycle()
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
-    private fun getScaledBitmap(bitmap: Bitmap, targetDpi: Int): Bitmap {
-        // ابعاد استاندارد کاغذ A4 به اینچ
-        val a4WidthInches = 8.27f
-        val a4HeightInches = 11.69f
-
-        // محاسبه حداکثر ابعاد مجاز بر اساس DPI هدف
-        val maxWidth = (a4WidthInches * targetDpi).toInt()
-        val maxHeight = (a4HeightInches * targetDpi).toInt()
-
-        if (bitmap.width <= maxWidth && bitmap.height <= maxHeight) {
-            return bitmap // نیازی به تغییر اندازه نیست
+    /**
+     * متد جدید: منطق خواندن حجم فایل به اینجا منتقل شد
+     */
+    fun getFileSizeFromUri(uriPath: String): Long? {
+        return try {
+            val uri = uriPath.toUri()
+            // روش اصلی و استاندارد
+            context.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    if (sizeIndex != -1 && !cursor.isNull(sizeIndex)) {
+                        return cursor.getLong(sizeIndex)
+                    }
+                }
+            }
+            // روش جایگزین
+            context.contentResolver.openFileDescriptor(uri, "r")?.use {
+                return it.statSize
+            }
+            null
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
-
-        val widthRatio = maxWidth.toFloat() / bitmap.width
-        val heightRatio = maxHeight.toFloat() / bitmap.height
-        val ratio = minOf(widthRatio, heightRatio)
-
-        val newWidth = (bitmap.width * ratio).roundToInt()
-        val newHeight = (bitmap.height * ratio).roundToInt()
-
-        return bitmap.scale(newWidth, newHeight)
     }
 }

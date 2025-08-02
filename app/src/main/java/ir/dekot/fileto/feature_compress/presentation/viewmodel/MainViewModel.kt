@@ -3,7 +3,8 @@ package ir.dekot.fileto.feature_compress.presentation.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
+// دیگر نیازی به ایمپورت Gson در اینجا نیست
+// import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.dekot.fileto.feature_compress.domain.model.CompressionProfile
 import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
@@ -32,16 +33,17 @@ class MainViewModel @Inject constructor(
 
     fun onFileSelected(uri: Uri?) {
         if (uri == null) return
-        val uriPath = uri.toString() // تبدیل Uri به String
+        val uriPath = uri.toString()
         val fileName = getFileNameUseCase(uriPath) ?: "Unknown File"
         _uiState.update {
             it.copy(
-                selectedFileUri = uriPath, // ذخیره به صورت String
+                selectedFileUri = uriPath,
                 selectedFileName = fileName
             )
         }
     }
 
+    // ... (متدهای دیگر بدون تغییر باقی می‌مانند) ...
     fun onResetFileSelection() {
         _uiState.update { MainScreenState() }
     }
@@ -50,8 +52,9 @@ class MainViewModel @Inject constructor(
         _uiState.update { it.copy(compressionProfile = profile) }
     }
 
+
     fun onStartCompression() {
-        val sourceUriPath = _uiState.value.selectedFileUri ?: return // حالا String است
+        val sourceUriPath = _uiState.value.selectedFileUri ?: return
         val fileName = _uiState.value.selectedFileName
         val originalSize = getFileSizeUseCase(sourceUriPath) ?: 0L
 
@@ -59,7 +62,7 @@ class MainViewModel @Inject constructor(
             _uiState.update { it.copy(isCompressing = true, snackbarMessage = null) }
 
             val result = compressPdfUseCase(
-                sourceUriPath = sourceUriPath, // ارسال String به UseCase
+                sourceUriPath = sourceUriPath,
                 fileName = fileName,
                 profile = _uiState.value.compressionProfile,
                 customSettings = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
@@ -69,20 +72,21 @@ class MainViewModel @Inject constructor(
                 }
             )
 
-            result.onSuccess { compressedFileUriPath -> // حالا String است
-                // ذخیره در تاریخچه
+            result.onSuccess { compressedFileUriPath ->
                 val compressedSize = getFileSizeUseCase(compressedFileUriPath) ?: 0L
                 val historyItem = HistoryItem(
                     id = 0,
                     fileName = fileName,
                     timestamp = System.currentTimeMillis(),
                     compressionProfile = _uiState.value.compressionProfile.displayName,
-                    customSettingsJson = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
-                        Gson().toJson(_uiState.value.customSettings)
+                    // <<-- تغییر اصلی اینجاست -->>
+                    // دیگر JSON را نمی‌سازیم و خود آبجکت را پاس می‌دهیم
+                    customSettings = if (_uiState.value.compressionProfile == CompressionProfile.CUSTOM) {
+                        _uiState.value.customSettings
                     } else null,
                     originalSize = originalSize,
                     compressedSize = compressedSize,
-                    compressedFileUri = compressedFileUriPath, // ذخیره مستقیم String
+                    compressedFileUri = compressedFileUriPath,
                     isStarred = false
                 )
                 addHistoryUseCase(historyItem)
@@ -101,6 +105,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    // ... (بقیه متدها بدون تغییر باقی می‌مانند) ...
     fun onShowSettingsDialog(show: Boolean) {
         _uiState.update { it.copy(showSettingsDialog = show) }
     }

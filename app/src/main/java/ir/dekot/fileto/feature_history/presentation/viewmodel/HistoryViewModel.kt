@@ -4,10 +4,9 @@ import android.content.Intent
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
+// دیگر نیازی به Gson در این کلاس نداریم
+// import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
-import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
-
 import ir.dekot.fileto.feature_history.domain.usecase.DeleteHistoryItemUseCase
 import ir.dekot.fileto.feature_history.domain.usecase.FormatFileSizeUseCase
 import ir.dekot.fileto.feature_history.domain.usecase.GetHistoryUseCase
@@ -53,18 +52,14 @@ class HistoryViewModel @Inject constructor(
                             100 - (domainItem.compressedSize * 100 / domainItem.originalSize)
                         } else 0
 
-                        // --- منطق پارس کردن JSON ---
-                        val customSettingsList: List<Pair<String, String>>? = domainItem.customSettingsJson?.let { json ->
-                            try {
-                                val settings = Gson().fromJson(json, CompressionSettings::class.java)
-                                buildList {
-                                    add("کیفیت تصویر" to "${settings.imageQuality}%")
-                                    add("حذف متادیتا" to if (settings.removeMetadata) "بله" else "خیر")
-                                    add("فشرده‌سازی ساختاری" to if (settings.useObjectStreamCompression) "بله" else "خیر")
-                                    add("حداکثر رزولوشن" to "${settings.downscaleResolution} DPI")
-                                }
-                            } catch (_: Exception) {
-                                null
+                        // --- << تغییر اصلی اینجاست >> ---
+                        // دیگر نیازی به پارس کردن JSON نیست. مستقیماً از آبجکت استفاده می‌کنیم.
+                        val customSettingsList: List<Pair<String, String>>? = domainItem.customSettings?.let { settings ->
+                            buildList {
+                                add("کیفیت تصویر" to "${settings.imageQuality}%")
+                                add("حذف متادیتا" to if (settings.removeMetadata) "بله" else "خیر")
+                                add("فشرده‌سازی ساختاری" to if (settings.useObjectStreamCompression) "بله" else "خیر")
+                                add("حداکثر رزولوشن" to "${settings.downscaleResolution} DPI")
                             }
                         }
 
@@ -73,6 +68,7 @@ class HistoryViewModel @Inject constructor(
                             fileName = domainItem.fileName,
                             formattedDate = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault()).format(Date(domainItem.timestamp)),
                             compressionProfile = domainItem.compressionProfile,
+                            // آبجکت جدید را به UI Item پاس می‌دهیم
                             customSettings = customSettingsList,
                             formattedSize = "${formatFileSizeUseCase(domainItem.originalSize)} -> ${formatFileSizeUseCase(domainItem.compressedSize)}",
                             reductionPercentage = reduction.toInt(),

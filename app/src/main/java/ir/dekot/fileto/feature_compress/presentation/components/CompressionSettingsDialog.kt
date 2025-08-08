@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.itextpdf.layout.element.Text
 import ir.dekot.fileto.R
 import ir.dekot.fileto.feature_compress.domain.model.CompressionSettings
 import kotlin.math.roundToInt

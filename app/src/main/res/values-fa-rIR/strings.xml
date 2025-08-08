@@ -33,4 +33,7 @@
     <string name="select_language">انتخاب زبان</string>
     <string name="language_persian">فارسی</string>
     <string name="language_english">English</string>
+    <string name="create_pdf_from_images">ساخت پی‌دی‌اف از عکس‌ها</string>
+    <string name="compress_after_creation">فشرده‌سازی بعد از ساخت</string>
+    <string name="start_pdf_creation">شروع ساخت پی‌دی‌اف</string>
 </resources>

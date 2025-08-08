@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
-    navController: NavController, // NavController اضافه شد
+    navController: NavController,
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -47,10 +47,12 @@ fun MainScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-                floatingActionButton = {
+        floatingActionButton = {
             ExpandingFab(
                 onHistoryClick = { navController.navigate(Screen.HistoryScreen.route) },
-                onSettingsClick = { navController.navigate(Screen.SettingsScreen.route) }
+                onSettingsClick = { navController.navigate(Screen.SettingsScreen.route) },
+                // رویداد کلیک برای صفحه جدید
+                onCreatePdfClick = { navController.navigate(Screen.CreatePdfScreen.route) }
             )
         }
     ) { paddingValues ->
@@ -78,6 +80,7 @@ fun MainScreen(
 
             if (uiState.selectedFileUri != null) {
                 Spacer(modifier = Modifier.height(24.dp))
+                // استفاده از کامپوننت اشتراکی
                 CompressionOptions(
                     selectedProfile = uiState.compressionProfile,
                     onProfileChange = viewModel::onCompressionProfileChanged,
@@ -86,6 +89,7 @@ fun MainScreen(
             }
 
             if (uiState.showSettingsDialog) {
+                // استفاده از کامپوننت اشتراکی
                 CompressionSettingsDialog(
                     currentSettings = uiState.customSettings,
                     onDismiss = { viewModel.onShowSettingsDialog(false) },

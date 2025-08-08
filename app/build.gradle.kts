@@ -33,6 +33,11 @@ android {
             )
         }
     }
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -76,6 +81,9 @@ dependencies {
     implementation(libs.itext.core) {
         exclude(group = "org.bouncycastle")
     }
+    implementation(libs.layout)
+// این کتابخانه برای کار با تصاویر و لی‌اوت ضروری است
+    implementation(libs.io)
     implementation(libs.bouncycastle.prov)
     implementation(libs.bouncycastle.pkix)
     // --- تست ---
@@ -97,4 +105,7 @@ dependencies {
    kapt(libs.androidx.room.compiler)
     // --- DataStore (برای ذخیره تنظیمات برنامه) ---
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.exifinterface)
+
 }

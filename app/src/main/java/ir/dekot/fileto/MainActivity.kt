@@ -24,6 +24,7 @@ import ir.dekot.fileto.core.di.LocaleEntryPoint
 import ir.dekot.fileto.core.navigation.Screen
 import ir.dekot.fileto.core.utils.updateLocale
 import ir.dekot.fileto.feature_compress.presentation.screen.MainScreen
+import ir.dekot.fileto.feature_create_pdf.presentation.screen.CreatePdfScreen
 import ir.dekot.fileto.feature_history.presentation.screen.HistoryScreen
 import ir.dekot.fileto.feature_settings.domain.model.Theme
 import ir.dekot.fileto.feature_settings.presentation.screen.SettingsScreen
@@ -71,7 +72,8 @@ class MainActivity : ComponentActivity() {
                 Theme.SYSTEM -> isSystemInDarkTheme()
             }
 
-            val layoutDirection = if (language.code == "fa") LayoutDirection.Rtl else LayoutDirection.Ltr
+            val layoutDirection =
+                if (language.code == "fa") LayoutDirection.Rtl else LayoutDirection.Ltr
 
             CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
                 FiletoTheme(darkTheme = darkTheme) {
@@ -92,6 +94,10 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(route = Screen.SettingsScreen.route) {
                                 SettingsScreen(navController = navController)
+                            }
+                            // روت جدید اضافه شد
+                            composable(route = Screen.CreatePdfScreen.route) {
+                                CreatePdfScreen(navController = navController)
                             }
                         }
                     }

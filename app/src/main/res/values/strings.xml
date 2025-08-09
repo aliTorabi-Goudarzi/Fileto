@@ -35,4 +35,21 @@
     <string name="create_pdf_from_images">Create PDF from Images</string>
     <string name="compress_after_creation">Compress After Creation</string>
     <string name="start_pdf_creation">Start PDF Creation</string>
+    <string name="pdf_tools">PDF Tools</string>
+    <string name="pdf_tools_description">Various tools for PDF manipulation</string>
+    <string name="split_pdf">Split PDF</string>
+    <string name="merge_pdf">Merge PDF</string>
+    <string name="split_pdf_description">Split PDF into multiple files</string>
+    <string name="merge_pdf_description">Merge multiple PDFs into one</string>
+    <string name="select_split_type">Select Split Type</string>
+    <string name="split_by_pages">Split by Pages</string>
+    <string name="split_by_range">Split by Range</string>
+    <string name="split_each_page">Each Page Separately</string>
+    <string name="page_range">Page Range (e.g., 1-5, 7, 9-12)</string>
+    <string name="pages_per_split">Pages per Split</string>
+    <string name="start_split">Start Split</string>
+    <string name="no_pdf_selected">No PDF file selected</string>
+    <string name="invalid_page_range">Invalid page range</string>
+    <string name="split_successful">PDF split successfully!</string>
+    <string name="select_file">Select File</string>
 </resources>

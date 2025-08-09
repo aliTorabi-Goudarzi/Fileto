@@ -36,4 +36,21 @@
     <string name="create_pdf_from_images">ساخت پی‌دی‌اف از عکس‌ها</string>
     <string name="compress_after_creation">فشرده‌سازی بعد از ساخت</string>
     <string name="start_pdf_creation">شروع ساخت پی‌دی‌اف</string>
+    <string name="pdf_tools">ابزارهای PDF</string>
+    <string name="pdf_tools_description">ابزارهای مختلف برای کار با PDF</string>
+    <string name="split_pdf">تقسیم PDF</string>
+    <string name="merge_pdf">ادغام PDF</string>
+    <string name="split_pdf_description">تقسیم PDF به چندین فایل</string>
+    <string name="merge_pdf_description">ادغام چندین PDF در یک فایل</string>
+    <string name="select_split_type">نوع تقسیم را انتخاب کنید</string>
+    <string name="split_by_pages">تقسیم بر اساس تعداد صفحات</string>
+    <string name="split_by_range">تقسیم بر اساس بازه</string>
+    <string name="split_each_page">هر صفحه جداگانه</string>
+    <string name="page_range">بازه صفحات (مثال: 1-5, 7, 9-12)</string>
+    <string name="pages_per_split">تعداد صفحات در هر قسمت</string>
+    <string name="start_split">شروع تقسیم</string>
+    <string name="no_pdf_selected">فایل PDF انتخاب نشده است</string>
+    <string name="invalid_page_range">بازه صفحات نامعتبر است</string>
+    <string name="split_successful">PDF با موفقیت تقسیم شد!</string>
+    <string name="select_file">انتخاب فایل</string>
 </resources>

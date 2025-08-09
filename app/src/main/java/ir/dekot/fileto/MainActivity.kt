@@ -26,6 +26,8 @@ import ir.dekot.fileto.core.utils.updateLocale
 import ir.dekot.fileto.feature_compress.presentation.screen.MainScreen
 import ir.dekot.fileto.feature_create_pdf.presentation.screen.CreatePdfScreen
 import ir.dekot.fileto.feature_history.presentation.screen.HistoryScreen
+import ir.dekot.fileto.feature_pdf_tools.presentation.screen.PdfToolsScreen
+import ir.dekot.fileto.feature_pdf_tools.presentation.screen.SplitPdfScreen
 import ir.dekot.fileto.feature_settings.domain.model.Theme
 import ir.dekot.fileto.feature_settings.presentation.screen.SettingsScreen
 import ir.dekot.fileto.ui.theme.FiletoTheme
@@ -98,6 +100,14 @@ class MainActivity : ComponentActivity() {
                             // روت جدید اضافه شد
                             composable(route = Screen.CreatePdfScreen.route) {
                                 CreatePdfScreen(navController = navController)
+                            }
+                            // ابزارهای PDF
+                            composable(route = Screen.PdfToolsScreen.route) {
+                                PdfToolsScreen(navController = navController)
+                            }
+                            // تقسیم PDF
+                            composable(route = Screen.SplitPdfScreen.route) {
+                                SplitPdfScreen(navController = navController)
                             }
                         }
                     }

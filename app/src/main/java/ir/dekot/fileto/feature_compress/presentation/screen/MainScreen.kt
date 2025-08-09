@@ -39,6 +39,7 @@ import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.Architecture
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudUpload
@@ -166,7 +167,8 @@ fun MainScreen(
             ModernExpandingFab(
                 onHistoryClick = { navController.navigate(Screen.HistoryScreen.route) },
                 onSettingsClick = { navController.navigate(Screen.SettingsScreen.route) },
-                onCreatePdfClick = { navController.navigate(Screen.CreatePdfScreen.route) }
+                onCreatePdfClick = { navController.navigate(Screen.CreatePdfScreen.route) },
+                onPdfToolsClick = { navController.navigate(Screen.PdfToolsScreen.route) }
             )
         },
         floatingActionButtonPosition = FabPosition.End
@@ -1004,7 +1006,8 @@ fun ModernCompressionSettingsDialog(
 fun ModernExpandingFab(
     onHistoryClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onCreatePdfClick: () -> Unit
+    onCreatePdfClick: () -> Unit,
+    onPdfToolsClick: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val rotationAngle by animateFloatAsState(
@@ -1018,6 +1021,30 @@ fun ModernExpandingFab(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // Sub FABs with staggered animation
+        // ابزارهای PDF
+        AnimatedVisibility(
+            visible = isExpanded,
+            enter = slideInVertically(
+                initialOffsetY = { it / 2 },
+                animationSpec = tween(300, delayMillis = 300)
+            ) + fadeIn(animationSpec = tween(300, delayMillis = 300)),
+            exit = slideOutVertically(
+                targetOffsetY = { it / 2 },
+                animationSpec = tween(200)
+            ) + fadeOut(animationSpec = tween(200))
+        ) {
+            ModernSubFab(
+                icon = Icons.Default.Build,
+                contentDescription = "PDF Tools",
+                onClick = {
+                    onPdfToolsClick()
+                    isExpanded = false
+                },
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            )
+        }
+
         AnimatedVisibility(
             visible = isExpanded,
             enter = slideInVertically(
@@ -1128,6 +1155,7 @@ private fun ModernSubFab(
         ) {
             Text(
                 text = when (icon) {
+                    Icons.Default.Build -> "ابزارهای PDF"
                     Icons.Default.AddPhotoAlternate -> "ساخت PDF"
                     Icons.Default.History -> "تاریخچه"
                     Icons.Default.Settings -> "تنظیمات"
